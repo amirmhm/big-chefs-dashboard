@@ -3,7 +3,7 @@ import {
   BarChart, Bar, PieChart, Pie, XAxis, YAxis, CartesianGrid, 
   Tooltip, Legend, ResponsiveContainer, Cell, LabelList 
 } from 'recharts';
-import Papa from 'papaparse';
+import Papa, { ParseResult } from 'papaparse';
 
 // Enhanced TypeScript interfaces
 interface CustomerData {
@@ -35,13 +35,6 @@ interface ChartDataItem {
   [key: string]: any;
 }
 
-// Add Papa.parse result interface
-interface PapaParseResult {
-  data: any[];
-  errors: any[];
-  meta: any;
-}
-
 // Constants
 const COLORS = [
   '#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', 
@@ -57,10 +50,12 @@ const ERROR_MESSAGES = {
 
 const CustomerAnalysisDashboard: React.FC = () => {
   // Properly typed state variables
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [data, setData] = useState<CustomerData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'distribution' | 'visitors'>('distribution');
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [totalCount, setTotalCount] = useState<number>(0);
   
   // Processed data states with proper types
@@ -68,76 +63,16 @@ const CustomerAnalysisDashboard: React.FC = () => {
   const [customerTypeData, setCustomerTypeData] = useState<ChartDataItem[]>([]);
   const [segmentData, setSegmentData] = useState<ChartDataItem[]>([]);
   const [visitorSegmentData, setVisitorSegmentData] = useState<ChartDataItem[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [regionCustomerTypeData, setRegionCustomerTypeData] = useState<ChartDataItem[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [scoreData, setScoreData] = useState<ChartDataItem[]>([]);
   
   // Additional chart data
   const [topDestinationsData, setTopDestinationsData] = useState<ChartDataItem[]>([]);
   const [visitorsByTypeData, setVisitorsByTypeData] = useState<ChartDataItem[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [visitorsByRegionData, setVisitorsByRegionData] = useState<ChartDataItem[]>([]);
-  
-  // Fetch data with improved error handling
-  useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await fetch('/data/amir_final.csv');
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        
-        const text = await response.text();
-        
-        Papa.parse(text, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          complete: (result: PapaParseResult) => {
-            if (result.errors.length > 0) {
-              setError(ERROR_MESSAGES.PARSE_FAILED);
-              setLoading(false);
-              return;
-            }
-            
-            setData(result.data as CustomerData[]);
-            processData(result.data as CustomerData[]);
-            setLoading(false);
-          },
-          error: () => {
-            setError(ERROR_MESSAGES.PARSE_FAILED);
-            setLoading(false);
-          }
-        });
-      } catch (error) {
-        console.error('Error reading file:', error);
-        setError(ERROR_MESSAGES.FETCH_FAILED);
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, []);
-  
-  // Main data processing function - memoized to avoid unnecessary recalculations
-  const processData = useCallback((data: CustomerData[]): void => {
-    // Set total count for percentage calculations
-    setTotalCount(data.length);
-    const totalVisitors = data.reduce((sum, row) => sum + (row.visitor_count || 0), 0);
-    
-    // Process data for visualizations
-    processChannelDistribution(data);
-    processCustomerTypeDistribution(data);
-    processSegmentDistribution(data);
-    processVisitorsBySegment(data, totalVisitors);
-    processRegionByCustomerType(data);
-    processScoreDistribution(data);
-    processTopDestinations(data, totalVisitors);
-    processVisitorsByCustomerType(data, totalVisitors);
-    processVisitorsByRegion(data, totalVisitors);
-  }, []);
   
   // Individual data processing functions - memoized for performance
   const processChannelDistribution = useCallback((data: CustomerData[]): void => {
@@ -342,6 +277,79 @@ const CustomerAnalysisDashboard: React.FC = () => {
     
     setScoreData(chartData);
   }, []);
+  
+  // Main data processing function - memoized to avoid unnecessary recalculations
+  const processData = useCallback((data: CustomerData[]): void => {
+    // Set total count for percentage calculations
+    setTotalCount(data.length);
+    const totalVisitors = data.reduce((sum, row) => sum + (row.visitor_count || 0), 0);
+    
+    // Process data for visualizations
+    processChannelDistribution(data);
+    processCustomerTypeDistribution(data);
+    processSegmentDistribution(data);
+    processVisitorsBySegment(data, totalVisitors);
+    processRegionByCustomerType(data);
+    processScoreDistribution(data);
+    processTopDestinations(data, totalVisitors);
+    processVisitorsByCustomerType(data, totalVisitors);
+    processVisitorsByRegion(data, totalVisitors);
+  }, [
+    processChannelDistribution,
+    processCustomerTypeDistribution,
+    processSegmentDistribution,
+    processVisitorsBySegment,
+    processRegionByCustomerType,
+    processScoreDistribution,
+    processTopDestinations,
+    processVisitorsByCustomerType,
+    processVisitorsByRegion
+  ]);
+  
+  // Fetch data with improved error handling
+  useEffect(() => {
+    const fetchData = async (): Promise<void> => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await fetch('/data/amir_final.csv');
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error ${response.status}`);
+        }
+        
+        const text = await response.text();
+        
+        Papa.parse(text, {
+          header: true,
+          dynamicTyping: true,
+          skipEmptyLines: true,
+          complete: (result: ParseResult) => {
+            if (result.errors.length > 0) {
+              setError(ERROR_MESSAGES.PARSE_FAILED);
+              setLoading(false);
+              return;
+            }
+            
+            setData(result.data as CustomerData[]);
+            processData(result.data as CustomerData[]);
+            setLoading(false);
+          },
+          error: () => {
+            setError(ERROR_MESSAGES.PARSE_FAILED);
+            setLoading(false);
+          }
+        });
+      } catch (error) {
+        console.error('Error reading file:', error);
+        setError(ERROR_MESSAGES.FETCH_FAILED);
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, [processData]);
   
   // Memoized render functions to prevent unnecessary re-renders
   const renderDistributionTab = useMemo(() => {
@@ -581,7 +589,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
                     `${value}% (${topDestinationsData.find(d => d.visitorPercent !== undefined && Math.abs(d.visitorPercent - value) < 0.01)?.visitors || 0} visitors)`,
                     'Percentage of Total Visitors'
                   ]}
-                  labelFormatter={(value) => {
+                  labelFormatter={(value: string) => {
                     const item = topDestinationsData.find(d => d.name === value);
                     return `${value}${item ? ` - ${item.type}` : ''}`;
                   }}
