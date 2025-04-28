@@ -1,5 +1,5 @@
 [build]
-  command = "npm install -g npm@9 && npm install --legacy-peer-deps --force --no-package-lock && react-scripts build"
+  command = "npm ci --legacy-peer-deps && react-scripts build"
   publish = "build"
 
 [build.environment]
