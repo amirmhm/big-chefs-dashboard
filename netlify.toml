@@ -1,5 +1,5 @@
 [build]
-  command = "npm ci --force --legacy-peer-deps && react-scripts build"
+  command = "npm ci --force --legacy-peer-deps && CI=false react-scripts build"
   publish = "build"
 
 [build.environment]
