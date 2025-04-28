@@ -1,0 +1,7 @@
+[build]
+  command = "npm install --legacy-peer-deps --force --no-package-lock && react-scripts build"
+  publish = "build"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9" 
