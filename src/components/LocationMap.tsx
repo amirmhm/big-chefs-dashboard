@@ -45,8 +45,9 @@ const LocationMap: React.FC<LocationMapProps> = ({
   useEffect(() => {
     if (showDestinations && location) {
       console.log("Fetching destinations for:", location.name);
-      // Try different path formats for the CSV
-      const csvFile = `${process.env.PUBLIC_URL}/data/amir_final_${location.name}.csv`;
+      // Convert location name to lowercase to match file naming
+      const locationName = location.name.toLowerCase();
+      const csvFile = `${process.env.PUBLIC_URL}/data/amir_final_${locationName}.csv`;
       console.log("Attempting to fetch CSV from:", csvFile);
       
       // Fetch the CSV data
@@ -116,8 +117,19 @@ const LocationMap: React.FC<LocationMapProps> = ({
   useEffect(() => {
     // Make sure we have a valid container and location data
     if (!mapContainerRef.current || !location?.latitude || !location?.longitude) {
+      console.error("Missing required data for map:", { 
+        hasContainer: !!mapContainerRef.current, 
+        lat: location?.latitude, 
+        lng: location?.longitude 
+      });
       return;
     }
+
+    console.log("Map initialization with:", {
+      location: location.name,
+      coordinates: [location.latitude, location.longitude],
+      destinationsCount: destinations.length
+    });
 
     // Clean up existing map first to prevent duplicate initialization
     if (mapRef.current) {
