@@ -1118,7 +1118,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
         {/* Footer Section */}
         <div className="p-4 mt-auto border-t border-gray-100">
           <div className="text-xs text-gray-500 text-center">
-            Powered by BigChefs Analytics
+            Powered by MapinData Analytics
           </div>
         </div>
       </div>
