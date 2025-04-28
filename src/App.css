@@ -1,5 +1,9 @@
 .App {
   text-align: center;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #f8fafc;
 }
 
 .App-logo {
@@ -14,7 +18,7 @@
 }
 
 .App-header {
-  background-color: #282c34;
+  background-color: #1e293b;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -25,7 +29,7 @@
 }
 
 .App-link {
-  color: #61dafb;
+  color: #60a5fa;
 }
 
 @keyframes App-logo-spin {
@@ -35,4 +39,33 @@
   to {
     transform: rotate(360deg);
   }
+}
+
+/* Chart and data visualization elements */
+.recharts-default-tooltip {
+  background-color: rgba(255, 255, 255, 0.95) !important;
+  border: none !important;
+  border-radius: 0.5rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  padding: 0.75rem !important;
+}
+
+.recharts-tooltip-label {
+  font-weight: 500 !important;
+  margin-bottom: 0.25rem !important;
+  color: #1e293b !important;
+}
+
+.recharts-tooltip-item {
+  padding: 0.25rem 0 !important;
+}
+
+.recharts-cartesian-axis-tick-value {
+  font-size: 11px !important;
+  fill: #64748b !important;
+}
+
+.recharts-legend-item-text {
+  color: #475569 !important;
+  font-size: 12px !important;
 }
