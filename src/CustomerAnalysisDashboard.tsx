@@ -533,7 +533,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
                   outerRadius={90}
                   innerRadius={40}
                   paddingAngle={3}
-                  label={({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%`}
+                  label={({name, percent}) => `${name}: ${percent.toFixed(1)}%`}
                 >
                   {salesChannelData.map((entry, index) => (
                     <Cell 
@@ -660,7 +660,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
                       fill={COLORS[index % COLORS.length]} 
                     />
                   ))}
-                  <LabelList dataKey="percent" position="top" formatter={(value: number) => `${value}%`} />
+                  <LabelList dataKey="percent" position="top" formatter={(value: number) => { console.log('LabelList value:', value); return `${value}%`; }} />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>
@@ -997,7 +997,11 @@ const CustomerAnalysisDashboard: React.FC = () => {
             {selectedLocation.displayName} Location
           </h3>
           <div className="h-[500px] mt-2">
-            <LocationMap location={selectedLocation} height={500} />
+            {selectedLocation && selectedLocation.latitude && selectedLocation.longitude ? (
+              <LocationMap location={selectedLocation} height={500} />
+            ) : (
+              <p>Loading map or location data incomplete...</p> // Or some other placeholder
+            )}
           </div>
         </div>
         
