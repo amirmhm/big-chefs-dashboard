@@ -533,7 +533,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
                   outerRadius={90}
                   innerRadius={40}
                   paddingAngle={3}
-                  label={({name, percent}) => `${name}: ${percent.toFixed(1)}%`}
+                  label={({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%`}
                 >
                   {salesChannelData.map((entry, index) => (
                     <Cell 
@@ -944,7 +944,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
 
         <div className="bg-white p-6 rounded-xl shadow-md border border-gray-100 md:col-span-2">
           <h3 className="text-lg font-medium mb-4 text-gray-800">Visitor Distribution by Venue Type</h3>
-          <div className="h-64 mt-2">
+          <div className="h-80 mt-2">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -956,7 +956,7 @@ const CustomerAnalysisDashboard: React.FC = () => {
                   outerRadius={90}
                   innerRadius={40}
                   paddingAngle={3}
-                  label={({name, percent}) => `${name}: ${percent.toFixed(1)}%`}
+                  label={({name, percent}) => `${name}: ${(percent * 100).toFixed(1)}%`}
                 >
                   {visitorsByTypeData.slice(0, 6).map((entry, index) => (
                     <Cell 
