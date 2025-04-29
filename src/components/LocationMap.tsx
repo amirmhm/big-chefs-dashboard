@@ -428,10 +428,10 @@ const LocationMap: React.FC<LocationMapProps> = ({
           // Add a more modern popup with destination info
           destMarker.bindPopup(`
             <div style="min-width: 200px; padding: 10px;">
-              <h4 style="margin: 0; font-size: 14px; font-weight: bold; color: #1F2937;">${dest.name}</h4>
+              <h4 style="margin: 0; font-size: 12px; font-weight: bold; color: #1F2937;">${dest.name}</h4>
               <div style="margin-top: 8px; display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 12px; color: #6B7280;">${dest.type || 'Unknown'}</span>
-                <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; font-weight: 500;">${dest.visitorCount} visitors</span>
+                <span style="font-size: 11px; color: #6B7280;">${dest.type || 'Unknown'}</span>
+                <span style="background: ${color}; color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 500;">${dest.visitorCount} visitors</span>
               </div>
             </div>
           `);
@@ -563,8 +563,8 @@ const LocationMap: React.FC<LocationMapProps> = ({
         // Popup for main location
         restaurantMarker.bindPopup(`
           <div style="text-align: center; min-width: 180px; padding: 8px;">
-            <h3 style="margin: 0 0 5px; font-size: 16px; font-weight: bold;">${location.displayName}</h3>
-            <div style="font-size: 12px; color: #666;">${location.name}</div>
+            <h3 style="margin: 0 0 5px; font-size: 14px; font-weight: bold;">${location.displayName}</h3>
+            <div style="font-size: 11px; color: #666;">${location.name}</div>
           </div>
         `);
         
@@ -673,18 +673,18 @@ const LocationMap: React.FC<LocationMapProps> = ({
       {destinations.length > 0 && (
         <div className="absolute top-4 left-4 bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-md border border-gray-100 text-xs z-[999]" style={{ maxWidth: '250px' }}>
           <div className="flex justify-between items-center mb-2">
-            <h4 className="font-semibold text-gray-800 text-sm">Top Destinations</h4>
-            <span className="bg-blue-100 text-blue-800 rounded-full px-2 py-0.5 text-xs">{destinations.length}</span>
+            <h4 className="font-semibold text-gray-800 text-xs">Top Destinations</h4>
+            <span className="bg-blue-100 text-blue-800 rounded-full px-2 py-0.5 text-[10px]">{destinations.length}</span>
           </div>
-          <p className="text-gray-500 mb-3 text-xs">Customer flow from {location.displayName}</p>
+          <p className="text-gray-500 mb-3 text-[10px]">Customer flow from {location.displayName}</p>
           <ul className="max-h-[200px] overflow-y-auto">
             {destinations.slice(0, 5).map((dest, index) => (
               <li key={index} className="mb-2 pb-2 border-b border-gray-100 last:border-b-0 last:mb-0 last:pb-0">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-700 truncate" style={{ maxWidth: '170px' }} title={dest.name}>{dest.name}</span>
-                  <span className="bg-blue-100 text-blue-800 rounded-full px-2 py-0.5">{dest.visitorCount}</span>
+                  <span className="font-medium text-gray-700 truncate text-xs" style={{ maxWidth: '170px' }} title={dest.name}>{dest.name}</span>
+                  <span className="bg-blue-100 text-blue-800 rounded-full px-2 py-0.5 text-[10px]">{dest.visitorCount}</span>
                 </div>
-                <div className="text-gray-500 text-xs mt-1">{dest.type || 'Unknown'}</div>
+                <div className="text-gray-500 text-[10px] mt-1">{dest.type || 'Unknown'}</div>
               </li>
             ))}
           </ul>
@@ -698,7 +698,7 @@ const LocationMap: React.FC<LocationMapProps> = ({
                   popup.innerHTML = `
                     <div class="bg-white rounded-lg p-5 max-w-lg w-full max-h-[80vh] overflow-auto shadow-xl">
                       <div class="flex justify-between items-center mb-4">
-                        <h3 class="font-bold text-lg text-gray-800">All Destinations (${destinations.length})</h3>
+                        <h3 class="font-bold text-base text-gray-800">All Destinations (${destinations.length})</h3>
                         <button id="close-popup" class="text-gray-500 hover:text-gray-700">
                           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                             <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -710,10 +710,10 @@ const LocationMap: React.FC<LocationMapProps> = ({
                         ${destinations.map((dest, i) => `
                           <div class="py-2 ${i < destinations.length - 1 ? 'border-b border-gray-100' : ''}">
                             <div class="flex justify-between items-center">
-                              <span class="font-medium text-gray-800">${dest.name}</span>
-                              <span class="bg-blue-100 text-blue-800 rounded-full px-2 py-0.5 text-xs">${dest.visitorCount}</span>
+                              <span class="font-medium text-gray-800 text-xs">${dest.name}</span>
+                              <span class="bg-blue-100 text-blue-800 rounded-full px-2 py-0.5 text-[10px]">${dest.visitorCount}</span>
                             </div>
-                            <div class="text-gray-500 text-sm mt-1">${dest.type || 'Unknown'}</div>
+                            <div class="text-gray-500 text-[10px] mt-1">${dest.type || 'Unknown'}</div>
                           </div>
                         `).join('')}
                       </div>
