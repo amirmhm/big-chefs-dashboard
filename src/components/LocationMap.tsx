@@ -9,6 +9,8 @@ interface LocationData {
   displayName: string;
   latitude?: number;
   longitude?: number;
+  folderPath?: string;
+  file?: string;
 }
 
 interface DestinationPoint {
@@ -54,8 +56,18 @@ const LocationMap: React.FC<LocationMapProps> = ({
   // Load the restaurant location coordinates
   useEffect(() => {
     if (location) {
-      // Fetch the restaurant coordinates from locations folder
-      const locationCsvFile = `/locations/BigChefs${location.name.charAt(0).toUpperCase() + location.name.slice(1)}.csv`;
+      // Get folder path from location or construct it
+      const folderPath = location.folderPath || `BigChefs${location.name}`;
+      
+      // Build path to coordinates file
+      // For BigChefs locations: BigChefsModa.csv
+      // For other locations: TheTownhouse.csv
+      const isBigChefsLocation = folderPath.startsWith('BigChefs');
+      const fileName = isBigChefsLocation
+        ? `BigChefs${location.name.charAt(0).toUpperCase() + location.name.slice(1)}.csv`
+        : `${folderPath}.csv`;
+      
+      const locationCsvFile = `/data/${folderPath}/${fileName}`;
       console.log("Fetching restaurant location from:", locationCsvFile);
       
       fetch(locationCsvFile)
@@ -118,19 +130,14 @@ const LocationMap: React.FC<LocationMapProps> = ({
   useEffect(() => {
     if (showDestinations && location) {
       console.log("Fetching destinations for:", location.name);
-      // Convert location name to lowercase to match file naming
-      const locationName = location.name.toLowerCase();
-      // Fix the path - try all possible variations
-      const possiblePaths = [
-        `/data/amir_final_${locationName}.csv`,
-        `./data/amir_final_${locationName}.csv`,
-        `${process.env.PUBLIC_URL}/data/amir_final_${locationName}.csv`,
-        `data/amir_final_${locationName}.csv`
-      ];
       
-      const csvFile = possiblePaths[0]; // Start with the first option
-      console.log("Will try these paths:", possiblePaths);
-      console.log("Starting with:", csvFile);
+      // Get folder path and file name
+      const folderPath = location.folderPath || `BigChefs${location.name}`;
+      const fileName = location.file || `amir_final_${location.name.toLowerCase()}.csv`;
+      
+      // Build the path to destination data
+      const csvFile = `/data/${folderPath}/${fileName}`;
+      console.log("Loading destination data from:", csvFile);
       
       // Fetch the CSV data
       fetch(csvFile)

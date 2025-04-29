@@ -68,3 +68,13 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## Adding New Locations
+
+The dashboard now uses a folder-based approach to manage locations. To add a new location:
+
+1. Create a folder in `public/data` with the name format `BigChefs{LocationName}`.
+2. Add the required data files to this folder.
+3. The location will automatically appear in the dashboard.
+
+For detailed instructions, see [Adding Locations](docs/adding_locations.md).

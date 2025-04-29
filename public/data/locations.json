@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Moda",
+    "displayName": "Big Chefs Moda",
+    "file": "amir_final_moda.csv",
+    "folderPath": "BigChefsModa"
+  },
+  {
+    "name": "Nisantasi",
+    "displayName": "Big Chefs Nisantasi",
+    "file": "amir_final_nisantasi.csv",
+    "folderPath": "BigChefsNisantasi"
+  },
+  {
+    "name": "Tarabya",
+    "displayName": "Big Chefs Tarabya",
+    "file": "amir_final_tarabya.csv",
+    "folderPath": "BigChefsTarabya"
+  },
+  {
+    "name": "TheTownhouse",
+    "displayName": "The Townhouse",
+    "file": "amir_final_thetownhouse.csv",
+    "folderPath": "TheTownhouse"
+  }
+]

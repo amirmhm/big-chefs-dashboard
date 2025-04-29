@@ -43,6 +43,7 @@ interface LocationData {
   displayName: string;
   latitude?: number;
   longitude?: number;
+  folderPath?: string;
 }
 
 // Constants
@@ -58,21 +59,25 @@ const ERROR_MESSAGES = {
   PARSE_FAILED: 'Failed to parse data. The file format might be incorrect.',
 };
 
-// Update LOCATIONS with coordinates
-const LOCATIONS: LocationData[] = [
+// This will be replaced with dynamic loading
+const DEFAULT_LOCATIONS: LocationData[] = [
   { 
-    name: 'moda', 
+    name: 'Moda', 
     file: 'amir_final_moda.csv', 
     displayName: 'Big Chefs Moda',
-    latitude: 40.9847,
-    longitude: 29.0300
+    folderPath: 'BigChefsModa'
   },
   { 
-    name: 'tarabya', 
+    name: 'Tarabya', 
     file: 'amir_final_tarabya.csv', 
     displayName: 'Big Chefs Tarabya',
-    latitude: 41.1228,
-    longitude: 29.0546
+    folderPath: 'BigChefsTarabya'
+  },
+  {
+    name: 'TheTownhouse',
+    file: 'amir_final_thetownhouse.csv',
+    displayName: 'The Townhouse',
+    folderPath: 'TheTownhouse'
   }
 ];
 
@@ -102,7 +107,9 @@ const CustomerAnalysisDashboard: React.FC = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [visitorsByRegionData, setVisitorsByRegionData] = useState<ChartDataItem[]>([]);
   
-  const [selectedLocation, setSelectedLocation] = useState<LocationData>(LOCATIONS[0]);
+  // Add state for dynamically loaded locations
+  const [locations, setLocations] = useState<LocationData[]>(DEFAULT_LOCATIONS);
+  const [selectedLocation, setSelectedLocation] = useState<LocationData>(DEFAULT_LOCATIONS[0]);
   
   // Individual data processing functions - memoized for performance
   const processChannelDistribution = useCallback((data: CustomerData[]): void => {
@@ -336,50 +343,129 @@ const CustomerAnalysisDashboard: React.FC = () => {
     processVisitorsByRegion
   ]);
   
-  // Fetch data with improved error handling
+  // Function to dynamically load location folders
+  const loadLocationFolders = useCallback(async () => {
+    try {
+      console.log("Loading location folders...");
+      // In a real application, we would use an API endpoint to get the folder list
+      // For now, we'll simulate it by checking if we can fetch a special JSON file
+      const response = await fetch('/data/locations.json');
+      
+      if (response.ok) {
+        // If the file exists, parse it to get the location folders
+        const locationsList = await response.json();
+        console.log("Loaded locations from JSON:", locationsList);
+        setLocations(locationsList);
+        setSelectedLocation(locationsList[0]);
+      } else {
+        // If the file doesn't exist, use the default locations
+        console.log('Using default locations as locations.json was not found');
+        
+        // Here we could implement a directory listing if the server supports it
+        // For now we'll use the default locations
+        setLocations(DEFAULT_LOCATIONS);
+        setSelectedLocation(DEFAULT_LOCATIONS[0]);
+      }
+    } catch (error) {
+      console.error('Error loading location folders:', error);
+      setLocations(DEFAULT_LOCATIONS);
+      setSelectedLocation(DEFAULT_LOCATIONS[0]);
+    }
+  }, []);
+
+  // Load location folders on component mount
   useEffect(() => {
-    const fetchData = async (): Promise<void> => {
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await fetch(`/data/${selectedLocation.file}`);
-        
-        if (!response.ok) {
-          throw new Error(`HTTP error ${response.status}`);
-        }
-        
-        const text = await response.text();
-        
-        Papa.parse(text, {
-          header: true,
-          dynamicTyping: true,
-          skipEmptyLines: true,
-          complete: (result: ParseResult) => {
-            if (result.errors.length > 0) {
-              setError(ERROR_MESSAGES.PARSE_FAILED);
-              setLoading(false);
-              return;
-            }
-            
-            setData(result.data as CustomerData[]);
-            processData(result.data as CustomerData[]);
-            setLoading(false);
-          },
-          error: () => {
+    loadLocationFolders();
+  }, [loadLocationFolders]);
+  
+  // Fetch data with improved error handling
+  const fetchData = useCallback(async (): Promise<void> => {
+    console.log("fetchData called with location:", selectedLocation);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // Check if we have a selected location
+      if (!selectedLocation) {
+        throw new Error('No location selected');
+      }
+      
+      // Use the folder path for loading data
+      const folderPath = selectedLocation.folderPath || `BigChefs${selectedLocation.name}`;
+      const csvFile = `/data/${folderPath}/${selectedLocation.file || `amir_final_${selectedLocation.name.toLowerCase()}.csv`}`;
+      
+      console.log(`Loading data from: ${csvFile}`);
+      
+      const response = await fetch(csvFile);
+      if (!response.ok) {
+        console.error(`HTTP error ${response.status} fetching ${csvFile}`);
+        throw new Error(ERROR_MESSAGES.FETCH_FAILED);
+      }
+      
+      const csvData = await response.text();
+      console.log(`CSV data loaded, length: ${csvData.length} characters`);
+      
+      Papa.parse(csvData, {
+        header: true,
+        dynamicTyping: true,
+        skipEmptyLines: true,
+        complete: (results: ParseResult) => {
+          console.log(`CSV parsing complete, rows: ${results.data.length}, errors: ${results.errors.length}`);
+          if (results.errors.length > 0) {
+            console.error('CSV parsing errors:', results.errors);
             setError(ERROR_MESSAGES.PARSE_FAILED);
             setLoading(false);
+            return;
           }
-        });
-      } catch (error) {
-        console.error('Error reading file:', error);
-        setError(ERROR_MESSAGES.FETCH_FAILED);
-        setLoading(false);
-      }
-    };
-    
-    fetchData();
-  }, [processData, selectedLocation]);
+          
+          const customerData = results.data as CustomerData[];
+          setData(customerData);
+          setTotalCount(customerData.length);
+          
+          // Calculate total visitors
+          const totalVisitors = customerData.reduce((sum, row) => sum + (row.visitor_count || 0), 0);
+          console.log(`Total visitors: ${totalVisitors}`);
+          
+          // Process data for various visualizations
+          processChannelDistribution(customerData);
+          processCustomerTypeDistribution(customerData);
+          processSegmentDistribution(customerData);
+          processVisitorsBySegment(customerData, totalVisitors);
+          processTopDestinations(customerData, totalVisitors);
+          processVisitorsByCustomerType(customerData, totalVisitors);
+          processVisitorsByRegion(customerData, totalVisitors);
+          console.log("All data processing complete");
+          
+          setLoading(false);
+        },
+        error: (error) => {
+          console.error('Papa parse error:', error);
+          setError(ERROR_MESSAGES.PARSE_FAILED);
+          setLoading(false);
+        }
+      });
+    } catch (error) {
+      console.error('Error fetching data:', error);
+      setError(ERROR_MESSAGES.FETCH_FAILED);
+      setLoading(false);
+    }
+  }, [selectedLocation, processChannelDistribution, processCustomerTypeDistribution, processSegmentDistribution, processVisitorsBySegment, processTopDestinations, processVisitorsByCustomerType, processVisitorsByRegion]);
+  
+  // Add useEffect to fetch data when location changes
+  useEffect(() => {
+    if (selectedLocation) {
+      console.log("Fetching data for selected location:", selectedLocation.displayName);
+      fetchData();
+    }
+  }, [selectedLocation, fetchData]);
+  
+  // Make sure initial data is loaded
+  useEffect(() => {
+    if (!loading && error === null && salesChannelData.length === 0 && selectedLocation) {
+      console.log("Initial data not loaded, fetching now...");
+      fetchData();
+    }
+  }, [loading, error, salesChannelData.length, selectedLocation, fetchData]);
   
   // Memoized render functions to prevent unnecessary re-renders
   const renderDistributionTab = useMemo(() => {
@@ -1091,14 +1177,14 @@ const CustomerAnalysisDashboard: React.FC = () => {
           <div className="mt-8">
             <h3 className="text-xs uppercase font-medium text-gray-400 tracking-wider mb-4 ml-1">Locations</h3>
             <ul className="rounded-xl overflow-hidden shadow-sm" style={{ cursor: 'default' }}>
-              {LOCATIONS.map((location, index) => (
+              {locations.map((location, index) => (
                 <li 
                   key={location.name}
                   className={`py-3.5 px-5 transition-all duration-200 text-base border-b border-gray-100 ${
                     selectedLocation.name === location.name
                       ? 'bg-blue-50 text-blue-600 font-medium border-l-4 border-blue-500 pl-4'
                       : 'bg-white text-gray-600 hover:bg-blue-50 hover:text-blue-600 pl-5'
-                  } ${index === LOCATIONS.length - 1 ? 'border-b-0' : ''}`}
+                  } ${index === locations.length - 1 ? 'border-b-0' : ''}`}
                   onClick={() => {
                     setSelectedLocation(location);
                     // If on map tab, no need to change tabs

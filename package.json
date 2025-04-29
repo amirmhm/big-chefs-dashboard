@@ -30,7 +30,9 @@
     "start": "FAST_REFRESH=true react-scripts start",
     "build": "npm install --legacy-peer-deps --force && react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "generate-locations": "node scripts/generate-locations.js",
+    "prestart": "npm run generate-locations"
   },
   "eslintConfig": {
     "extends": [
